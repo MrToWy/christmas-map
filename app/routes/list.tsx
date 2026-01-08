@@ -2,6 +2,8 @@ import {type ColumnDef} from "@tanstack/react-table";
 import type {Route} from "./+types/home";
 import {DataTable} from "~/components/data-table/dataTable";
 import type {Payment} from "~/types/payment";
+import {Button} from "~/components/ui/button";
+import {ArrowUpDown} from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -21,7 +23,17 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: "amount",
-    header: "Amount",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Amount
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
 ]
 
@@ -37,6 +49,12 @@ async function getData(): Promise<Payment[]> {
     {
       id: "728ed52f",
       amount: 200,
+      status: "pending",
+      email: "m@example.com",
+    },
+    {
+      id: "728ed52f",
+      amount: 100,
       status: "pending",
       email: "m@example.com",
     },
