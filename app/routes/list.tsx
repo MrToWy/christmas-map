@@ -4,6 +4,7 @@ import {DataTable} from "~/components/data-table/dataTable";
 import type {Payment} from "~/types/payment";
 import {Button} from "~/components/ui/button";
 import {ArrowUpDown} from "lucide-react";
+import {Badge} from "~/components/ui/badge";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -67,6 +68,7 @@ export default async function List() {
 
     return (
         <div className="container mx-auto py-10">
+          <Badge variant="default">Example Badge</Badge>
           <DataTable columns={columns} data={data} />
         </div>
   )
