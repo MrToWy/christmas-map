@@ -1,0 +1,56 @@
+name: React Router CI with NPM (Optimized ZIP)
+
+on:
+  workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🚚 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+
+    - name: 🔨 Install & Build
+      run: |
+          npm ci
+          npm run build
+          # Prune dev dependencies to keep the ZIP small
+          # npm prune --production
+
+    - name: 📦 Prepare ZIP
+      run: |
+        zip -r deploy.zip build package.json package-lock.json
+
+    - name: 📂 Upload ZIP
+      uses: wlixcc/SFTP-Deploy-Action@v1.0
+      with:
+          username: ${{ secrets.SSH_USER }}
+          server: '${{ secrets.SERVER_IP }}'
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          local_path: './deploy.zip'
+          remote_path: '${{ secrets.SERVER_PATH }}'
+
+    - name: 🛠️ Extract & Restart
+      uses: 'garygrossgarten/github-action-ssh@v0.6.3'
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SSH_USER }}
+        privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+        command: |
+          cd ${{ secrets.SERVER_PATH }}
+          rm -rf build node_modules
+          unzip -o deploy.zip
+          npm ci --omit=dev
+          supervisorctl restart christmasmap
+
+    - name: 📢 Discord Notification
+      uses: joelwmale/webhook-action@2.1.0
+      with:
+        url: ${{ secrets.WEBHOOK_URL }}
+        body: '{"content": "christmasmap (React Router) wurde erfolgreich via ZIP-Deployment aktualisiert."}'
