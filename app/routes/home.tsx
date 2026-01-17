@@ -103,6 +103,32 @@ export default function Home() {
     }
   }
 
+  async function handleTest() {
+    try {
+      const response = await fetch("http://localhost:5223/user/me", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        },
+        // IMPORTANT: This allows the browser to send the session cookie
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`Logged in as: ${data.username}`);
+        console.log("User data:", data);
+      } else if (response.status === 401) {
+        alert("Not logged in (401 Unauthorized)");
+      } else {
+        alert(`Error: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Test request failed:", error);
+      alert("Failed to reach the server.");
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4 items-start p-4">
       <p>Welcome to Passwordless Login</p>
@@ -125,6 +151,10 @@ export default function Home() {
 
         <Button onClick={handleLogin} variant="secondary">
           Login with Passkey
+        </Button>
+
+        <Button onClick={handleTest} variant="secondary">
+          Test logged in status
         </Button>
       </div>
     </div>
